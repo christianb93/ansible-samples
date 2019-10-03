@@ -1,0 +1,98 @@
+---
+#
+# This playbook will install Docker and nginx on each host.
+# In addition, it will create a standard index page containing
+# the IP address of the node
+#
+
+# Our first play. We create an Ansible user on the host
+# that we will then use for the second play. This assumes
+# that the key file is located in ~/.keys/ansible_key
+- name: Initial setup
+  hosts: servers
+  tasks:
+  - name: Create a user ansible_user on the host
+    user:
+      name: ansible_user
+      state: present
+  - name: Create a directory /home/ansible_user/.ssh
+    file:
+      path: /home/ansible_user/.ssh
+      group: ansible_user
+      owner: ansible_user
+      mode: 0700
+      state: directory
+  - name: Distribute ssh key
+    copy:
+      src: ~/.keys/ansible_key.pub
+      dest: /home/ansible_user/.ssh/authorized_keys
+      mode: 0700
+      owner: ansible_user
+      group: ansible_user
+  - name: Add newly created user to sudoers file
+    lineinfile:
+      path: /etc/sudoers
+      state: present
+      line: "ansible_user      ALL = NOPASSWD: ALL"
+
+# Our second play. We now use the ansible_user provisioned
+# in the previous play to install Docker and nginx
+- name: Install Docker and nginx
+  hosts: servers
+  remote_user: ansible_user
+  become: yes
+  vars:
+    ansible_ssh_private_key_file: ~/.keys/ansible_key
+  tasks:
+  - name: install Docker
+    apt:
+      name: docker.io
+      state: latest
+      update_cache: yes
+      force_apt_get: yes
+  # To use the docker module, we need the docker python module
+  # and to install this, we in turn need pip3
+  - name: Install pip3
+    apt:
+      name: python3-pip
+      state: latest
+      force_apt_get: yes
+  - name: Install docker python module
+    command:
+      pip3 install docker
+  # Now we prepare our index.html file and copy
+  # it to the host
+  - name: create directory for content
+    file:
+      state: directory
+      owner: ansible_user
+      group: ansible_user
+      path: /home/ansible_user/web/
+  - name: copy custom index.html to host
+    copy:
+      src: ./index.html
+      dest: /home/ansible_user/web/index.html
+      owner: ansible_user
+      group: ansible_user
+      mode: 0777
+  - name: Patch file, using the IP address discovered by Ansible
+    lineinfile:
+      path: /home/ansible_user/web/index.html
+      regexp: '^ABC'
+      line: "{{ ansible_facts['default_ipv4']['address'] }}"
+      state: present
+  # We can finally deploy nginx now. We map port 80 in the container
+  # to port 80 on the host and map the directory /usr/share/nginx/html
+  # from which nginx servers content to ~/web on the host
+  - name: deploy nginx
+    docker_container:
+      image: nginx:latest
+      name: myNginx
+      network_mode: bridge
+      published_ports: 80:80
+      volumes:
+      - /home/ansible_user/web:/usr/share/nginx/html/
+      state: started
+  - name: print message
+    debug:
+      msg: "Done - run curl {{ ansible_facts['default_ipv4']['address'] }} to check the result"

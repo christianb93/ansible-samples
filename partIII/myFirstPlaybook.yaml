@@ -1,0 +1,30 @@
+---
+# Our first play. We create an Ansible user on the host
+# that we will then use for the second play. This assumes
+# that the key file is located in ~/.keys/ansible_key
+- name: Initial setup
+  hosts: servers
+  tasks:
+  - name: Create a user ansible_user on the host
+    user:
+      name: ansible_user
+      state: present
+  - name: Create a directory /home/ansible_user/.ssh
+    file:
+      path: /home/ansible_user/.ssh
+      group: ansible_user
+      owner: ansible_user
+      mode: 0700
+      state: directory
+  - name: Distribute ssh key
+    copy:
+      src: ~/.keys/ansible_key.pub
+      dest: /home/ansible_user/.ssh/authorized_keys
+      mode: 0700
+      owner: ansible_user
+      group: ansible_user
+  - name: Add newly created user to sudoers file
+    lineinfile:
+      path: /etc/sudoers
+      state: present
+      line: "ansible_user      ALL = NOPASSWD: ALL"
