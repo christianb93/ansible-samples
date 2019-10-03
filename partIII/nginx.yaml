@@ -10,6 +10,7 @@
 # that the key file is located in ~/.keys/ansible_key
 - name: Initial setup
   hosts: servers
+  become: yes
   tasks:
   - name: Create a user ansible_user on the host
     user:

@@ -1,0 +1,28 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+Vagrant.configure("2") do |config|
+
+  # Ask Vagrant not to randomly generate keys as we will supply our own keys
+  config.ssh.insert_key = false
+  # Tell Vagrant which private keys to use. We still need to keep the default Vagrant key
+  # as the next command would otherwise already try to use the Ansible key which is not yet
+  # in the authorized_keys file at this point in time
+  config.ssh.private_key_path = ['~/.vagrant.d/insecure_private_key', '~/.keys/ansible_key'] 
+  # Add our own key to authorized_keys file
+  config.vm.provision "file", source: "~/.keys/ansible_key.pub", destination: "~/.ssh/authorized_keys" 
+  
+  # We set up two boxes, connected to the same private network 
+  # with static IP addresses
+  config.vm.define "boxA" do |boxA|
+    boxA.vm.box = "ubuntu/bionic64"
+    boxA.vm.network "private_network", ip: "192.168.33.10"
+  end
+
+  config.vm.define "boxB" do |boxB|
+    boxB.vm.box = "ubuntu/bionic64"
+    boxB.vm.network "private_network", ip: "192.168.33.11"
+  end
+
+end
