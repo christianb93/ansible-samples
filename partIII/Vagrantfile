@@ -9,9 +9,9 @@ Vagrant.configure("2") do |config|
   # Tell Vagrant which private keys to use. We still need to keep the default Vagrant key
   # as the next command would otherwise already try to use the Ansible key which is not yet
   # in the authorized_keys file at this point in time
-  config.ssh.private_key_path = ['~/.vagrant.d/insecure_private_key', '~/.keys/ansible_key'] 
+  config.ssh.private_key_path = ['~/.vagrant.d/insecure_private_key', '~/vagrant/vagrant_key'] 
   # Add our own key to authorized_keys file
-  config.vm.provision "file", source: "~/.keys/ansible_key.pub", destination: "~/.ssh/authorized_keys" 
+  config.vm.provision "file", source: "~/vagrant/vagrant_key.pub", destination: "~/.ssh/authorized_keys" 
   
   # We set up two boxes, connected to the same private network 
   # with static IP addresses
