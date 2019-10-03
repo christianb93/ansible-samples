@@ -9,7 +9,7 @@
 # that we will then use for the second play. This assumes
 # that the key file is located in ~/.keys/ansible_key
 - name: Initial setup
-  hosts: servers
+  hosts: all
   become: yes
   tasks:
   - name: Create a user ansible_user on the host
@@ -39,7 +39,7 @@
 # Our second play. We now use the ansible_user provisioned
 # in the previous play to install Docker and nginx
 - name: Install Docker and nginx
-  hosts: servers
+  hosts: all
   remote_user: ansible_user
   become: yes
   vars:

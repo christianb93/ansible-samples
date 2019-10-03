@@ -3,7 +3,7 @@
 # that we will then use for the second play. This assumes
 # that the key file is located in ~/.keys/ansible_key
 - name: Initial setup
-  hosts: servers
+  hosts: all
   become: yes
   tasks:
   - name: Create a user ansible_user on the host
