@@ -1,0 +1,27 @@
+---
+- hosts: all
+  become: yes
+  # We can define a variable on the level of a play, it is
+  # then valid for all hosts to which the play applies
+  vars:
+    myVar1: "Hello"
+  tasks:
+    # We can also set a variable using the set_fact module
+    # This will be valid for the respective host until completion
+    # of the playbook
+  - name: Set variable
+    set_fact:
+      myVar2: "World"
+      myVar5: "{{ ansible_facts['machine_id'] }}"
+    # We can register variables with tasks, so that the output of the
+    # task will be captured in the variable
+  - name: Register variables
+    command: "date"
+    register:
+      myVar3
+  - name: Print variables
+    # We can also set variables on the task level
+    vars:
+      myVar4: 123
+    debug:
+      var: myVar1, myVar2, myVar3['stdout'], myVar4, myVar5, myVar6
