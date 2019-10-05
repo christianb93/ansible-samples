@@ -1,0 +1,38 @@
+<html><body>
+<p><b>Machine characteristics:</b></p>
+<table>
+  <tr><td>Host:</td> <td>{{ inventory_hostname }}</td></tr>
+  <tr><td>Ansible machine ID:</td> <td>{{ ansible_facts['machine_id'] }}</td></tr>
+  <tr><td>Distribution:</td> <td>{{ ansible_facts.distribution }}</td></tr>
+  <tr><td>CPU cores:</td> <td>{{ ansible_facts.processor_cores }}</td></tr>
+  </table>
+<p><b>Host groups in inventory file:</b></p>
+<table>
+{% for key, members in groups.items() %}
+  <tr>
+    <td>{{ key }}</td>
+    <td>{{ members | join(', ') }}</td>
+  </tr>
+{% endfor %}
+</table>
+<p><b>Network interfaces</b></p>
+<table>
+{% for interface in ansible_facts['interfaces'] %}
+  {% set type = ansible_facts[interface].type %}
+  {% set ip = ansible_facts[interface].ipv4['address']|default('') %}
+  <tr>
+    <td>{{ interface }}</td>
+    <td>{{ type }}</td>
+    <td>{{ ip }}</td>
+  </tr>
+{% endfor %}
+</table>
+<p><b>Environment variables:</b></p>
+<table>
+{% for key, value in ansible_facts['env'].items() %}
+  <tr><td>{{ key }}</td><td>{{ value }}</td></tr>
+{% endfor %}
+</table>
+
+
+</body></html>

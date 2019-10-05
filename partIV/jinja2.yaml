@@ -1,0 +1,53 @@
+---
+#
+# This playbook will install Docker and nginx on each host.
+# In addition, it will create a standard index page that prints
+# some details on the node using Jinja2
+#
+- name: Install Docker and nginx
+  hosts: all
+  become: yes
+  tasks:
+  - name: install Docker
+    apt:
+      name: docker.io
+      state: latest
+      update_cache: yes
+      force_apt_get: yes
+  # To use the docker module, we need the docker python module
+  # and to install this, we in turn need pip3
+  - name: Install pip3
+    apt:
+      name: python3-pip
+      state: latest
+      force_apt_get: yes
+  - name: Install docker python module
+    command:
+      pip3 install docker
+  # Now we prepare our index.html file and copy
+  # it to the host
+  - name: create directory for content
+    file:
+      state: directory
+      owner: vagrant
+      group: vagrant
+      path: /home/vagrant/web/
+  - name: Convert template into custom index.html
+    template:
+      src: index.html.j2
+      dest: /home/vagrant/web/index.html
+      owner: vagrant
+      group: vagrant
+      mode: 0777
+  # We can finally deploy nginx now. We map port 80 in the container
+  # to port 80 on the host and map the directory /usr/share/nginx/html
+  # from which nginx servers content to ~/web on the host
+  - name: deploy nginx
+    docker_container:
+      image: nginx:latest
+      name: myNginx
+      network_mode: bridge
+      published_ports: 80:80
+      volumes:
+      - /home/vagrant/web:/usr/share/nginx/html/
+      state: started
