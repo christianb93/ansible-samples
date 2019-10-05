@@ -1,5 +1,10 @@
 <html><body>
 <p><b>Machine characteristics:</b></p>
+<!-- Here, we use simple templating syntax. We evaluate variables
+     like inventory_hostname, and dictionaries like ansible_facts
+     In Jinja, we can either use ['key'] or .key to refer to an
+     item in a dictionary
+-->
 <table>
   <tr><td>Host:</td> <td>{{ inventory_hostname }}</td></tr>
   <tr><td>Ansible machine ID:</td> <td>{{ ansible_facts['machine_id'] }}</td></tr>
@@ -7,6 +12,13 @@
   <tr><td>CPU cores:</td> <td>{{ ansible_facts.processor_cores }}</td></tr>
   </table>
 <p><b>Host groups in inventory file:</b></p>
+<!--
+  Next, we loop over a dictionary. To do this, we first need to invoke
+  the item() method on the dictionary to turn it into something
+  we can iterate over.
+  In our case, the value is again a sequence (a list of hosts), and
+  we can use the join filter to turn this into a string
+-->
 <table>
 {% for key, members in groups.items() %}
   <tr>
@@ -17,7 +29,18 @@
 </table>
 <p><b>Network interfaces</b></p>
 <table>
+<!--
+  This is even more complicated. The ansible facts contain a list
+  of interfaces, like enp0s3. Each interface again turns up as key
+  under which additional details are stored. So our key is now dynamic
+  To deal with that, we first loop over the interfaces
+-->
 {% for interface in ansible_facts['interfaces'] %}
+  <!--
+    We now use the set directive to assign the details for the respective
+    interface to a helper variable. Note that in this context, we navigate
+    the dictionary ansible_facts as we would do it in plain Python
+  -->
   {% set type = ansible_facts[interface].type %}
   {% set ip = ansible_facts[interface].ipv4['address']|default('') %}
   <tr>
@@ -27,12 +50,4 @@
   </tr>
 {% endfor %}
 </table>
-<p><b>Environment variables:</b></p>
-<table>
-{% for key, value in ansible_facts['env'].items() %}
-  <tr><td>{{ key }}</td><td>{{ value }}</td></tr>
-{% endfor %}
-</table>
-
-
 </body></html>

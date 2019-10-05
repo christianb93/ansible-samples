@@ -1,8 +1,19 @@
 import jinja2
+#
+# Create a Jinja2 environment, using the file system loader
+# to be able to load templates from the local file system
+#
 env = jinja2.Environment(
     loader=jinja2.FileSystemLoader('.')
 )
+#
+# Load our template
+#
 template = env.get_template('index.html.j2')
+#
+# Prepare the input variables, as Ansible would to it (use ansible -m setup to see
+# how this structure looks like, you can even copy the JSON output)
+#
 groups = {'all': ['127.0.0.1', '192.168.33.44']}
 ansible_facts={
         "all_ipv4_addresses": [
@@ -26,4 +37,7 @@ ansible_facts={
             "type": "ether"
         },
 }
+#
+# Render the template and print the output
+#
 print(template.render(groups=groups, ansible_facts=ansible_facts))
