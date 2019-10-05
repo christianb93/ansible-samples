@@ -5,6 +5,8 @@
   # then valid for all hosts to which the play applies
   vars:
     myVar1: "Hello"
+  vars_files:
+  - vars.yaml
   tasks:
     # We can also set a variable using the set_fact module
     # This will be valid for the respective host until completion
@@ -24,4 +26,4 @@
     vars:
       myVar4: 123
     debug:
-      var: myVar1, myVar2, myVar3['stdout'], myVar4, myVar5, myVar6
+      var: myVar1, myVar2, myVar3['stdout'], myVar4, myVar5, myVar6, myVar7
