@@ -1,8 +1,8 @@
 # Use Ubuntus official image for 18.04
 FROM  ubuntu:bionic
 
-# Install ssh
-RUN apt-get update && apt-get install -y openssh-server
+# Install ssh and sudo
+RUN apt-get update && apt-get install -y openssh-server sudo
 
 # Create sshd directory
 RUN mkdir /var/run/sshd

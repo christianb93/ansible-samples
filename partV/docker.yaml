@@ -31,10 +31,11 @@
         ansible_ssh_private_key_file: "./ansible"
         groups: docker_nodes
   #
-  # Our second play. We now ping our host using the newly created inventory 
+  # Our second play. We now ping our host using the newly created inventory
   #
   - name: Ping host
     hosts: docker_nodes
+    become: yes
     tasks:
     - name: Ping  host
       ping:
