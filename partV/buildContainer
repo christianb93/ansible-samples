@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#
+# Generate a key-pair
+#
+ssh-keygen -P "" -b 2048 -t rsa -f ansible
+
+#
+# Build Docker container. This will also import the
+# public key into the container
+#
+docker build -t node .
