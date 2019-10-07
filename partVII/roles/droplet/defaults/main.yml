@@ -1,0 +1,11 @@
+---
+# The name of the SSH key that we have stored on DigitalOcean and
+# that we will use to provision our machines
+doKeyName: do-default-key
+# The corresponding private key file
+doPrivateKeyFile: ~/.ssh/do-default-key
+# Target state. When "present", we will bring up the machines. When
+# "absent", we tear them down
+targetState: present
+# Number of machines to manage
+machineCount: 1

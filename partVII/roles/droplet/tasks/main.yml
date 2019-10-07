@@ -1,0 +1,104 @@
+---
+# Check that we have all variables that we need
+- assert:
+    that:
+      - doKeyName != ''
+      - doPrivateKeyFile != ''
+      - targetState != ''
+      - machineCount != ''
+      -
+  tags: ['check_vars']
+# Get the API token from the environment variable so that
+# we can easily access it
+- name: Get API token
+  set_fact:
+    apiToken: "{{ lookup('env', 'DO_TOKEN') }}"
+# First, we get a list of all available SSH keys. Note that the
+# list of keys will be added to the Ansible facts with the
+# key ssh_keys
+- name: Get available SSH keys
+  digital_ocean_sshkey_facts:
+    oauth_token: "{{ apiToken }}"
+# We now need to browse the resulting output to get the key that
+# we want to use. We do this using a JSON query that we prepare next
+- name: Prepare JSON query string
+  set_fact:
+    jsonQueryString: "[?name=='{{ doKeyName }}']"
+# We now apply the query string
+- name: Apply query String to extract matching key data
+  set_fact:
+      keyData: "{{ ansible_facts['ssh_keys']|json_query(jsonQueryString) }}"
+# and get the key ID from the result
+- name: Get keyId
+  set_fact:
+      keyId: "{{ keyData[0]['id'] }}"
+#  Later, we will add SSH configuration data for the hosts that we provision
+# to the local SSH configuration of the user that is running Ansible. We do
+# this by including a file which we now prepare
+- name: Cleanup SSH config file
+  shell: "echo > ~/.ssh/do_config"
+# Having the key Id, we can now bring up the machines
+- name: Bring up or stop machines
+  digital_ocean_droplet:
+    oauth_token: "{{ apiToken }}"
+    image: ubuntu-18-04-x64
+    region_id: fra1
+    size_id: s-1vcpu-1gb
+    ssh_keys: [ "{{ keyId }}" ]
+    state: "{{ targetState }}"
+    unique_name: yes
+    name: "myHost{{ item }}"
+    wait: yes
+    wait_timeout: 240
+    tags:
+    - "createdByAnsible"
+  loop:  "{{ range(0, machineCount|int )|list }}"
+  register: machineInfo
+# Now add hosts to inventory. Note that we only do this if the targetState
+# is present, i.e. if we added a host (or did not change anything), otherwise
+# item.data is empty and we fail. Note the usage of loop_control to
+# avoid a long message containing the entire item
+- name: Add IP address to inventory
+  add_host:
+    name: "{{ item.data.droplet.name }}"
+    ansible_ssh_host: "{{ item.data.droplet.networks.v4[0].ip_address }}"
+    ansible_ssh_user: root
+    ansible_ssh_private_key_file: "{{ doPrivateKeyFile }}"
+    groups: droplets
+  loop: "{{ machineInfo.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: targetState == 'present'
+# For each host, we also add an entry to .ssh/do_config
+- name: Add host to SSH config file
+  shell: |
+    cat >> ~/.ssh/do_config <<EOF
+    Host "{{item.data.droplet.name}}"
+    HostName "{{ item.data.droplet.networks.v4[0].ip_address }}"
+    User "root"
+    IdentityFile "{{ doPrivateKeyFile }}"
+    CheckHostIP "no"
+    Compression "yes"
+    ForwardX11 "yes"
+    StrictHostKeyChecking "no"
+    EOF
+  loop: "{{ machineInfo.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: targetState == 'present'
+# Include our file in user-specific ssh-configuration file
+# on the control machine
+- name: Include DigitalOcean SSH configuration file
+  lineinfile:
+    create: yes
+    state: present
+    path: ~/.ssh/config
+    line: Include ~/.ssh/do_config
+# And print success message
+- name: Print results
+  debug:
+    msg: "Added host {{ item.data.droplet.name }} - use ssh -i {{ doPrivateKeyFile }} -X -C root@{{ item.data.droplet.networks.v4[0].ip_address }} or ssh  {{ item.data.droplet.name }} to connect"
+  loop: "{{ machineInfo.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: targetState == 'present'
