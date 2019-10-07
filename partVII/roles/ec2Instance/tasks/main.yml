@@ -1,0 +1,44 @@
+---
+# Bring up an EC2 instance
+
+# Check that we have all variables that we need
+- assert:
+    that:
+      -
+  tags: ['check_vars']
+
+# First we need to find the proper AMI to use
+- name: Locate latest AMI
+  ec2_ami_facts:
+    region: "eu-central-1"
+    owners: 099720109477
+    filters:
+      name: "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-????????"
+      state: "available"
+  register: allAMIs
+  # Now get the latest AMI, this will put the image_id into latestAMI.image_id
+- name: Show all allAMIs
+  debug:
+    var: allAMIs
+- name: Sort by creation date to find the latest AMI
+  set_fact:
+    latestAMI: "{{ allAMIs.images | sort(attribute='creation_date') | last }}"
+- name: Show latest AMI
+  debug:
+    var: latestAMI
+- name: Provision machine
+  ec2:
+    exact_count: 1
+    count_tag: "managedByAnsible"
+    image: "{{ latestAMI.image_id }}"
+    instance_tags:
+      managedByAnsible: true
+    instance_type: "t2.micro"
+    key_name: ec2-default-key
+    region: "eu-central-1"
+    wait: yes
+  register: ec2Result
+- name: Show results
+  debug:
+    var: ec2Result
+# Now we need to add the host to the inventory. 

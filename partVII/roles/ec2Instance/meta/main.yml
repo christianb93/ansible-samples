@@ -1,0 +1,8 @@
+galaxy_info:
+  author: christianb93
+  description: Bring up an AWS EC2 instance
+  license: MIT
+  min_ansible_version: 2.4
+  galaxy_tags: []
+
+dependencies: []

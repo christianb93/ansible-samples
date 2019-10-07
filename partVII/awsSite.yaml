@@ -1,0 +1,7 @@
+---
+# Our first play will bring up the machines
+- name: Create machines
+  hosts: localhost
+  connection: local
+  roles:
+  - ec2Instance
