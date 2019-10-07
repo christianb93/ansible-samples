@@ -1,0 +1,12 @@
+galaxy_info:
+  author: christianb93
+  description: A simple role to create a standard user on all nodes
+
+  license: MIT
+
+  min_ansible_version: 2.4
+
+  galaxy_tags: []
+
+dependencies: []
+  

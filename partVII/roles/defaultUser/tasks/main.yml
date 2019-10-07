@@ -1,0 +1,31 @@
+---
+# This role will create a user on the host with user name userName. For
+# this user, an entry in the sudoers file is generated which gives the user
+# full sudo privileges without password authentication. In addition,
+# we copy the SSH key {{userPrivateKeyFile}}.pub to the authorized_keys
+# file of the new user, so that it can be used to log in via SSH
+# public key authorization
+- name: Create a default user on the host
+  user:
+    name: "{{userName}}"
+    shell: "/bin/bash"
+    state: present
+- name: Create home directory for the new user
+  file:
+    path: /home/{{userName}}/.ssh
+    group: "{{userName}}"
+    owner: "{{userName}}"
+    mode: 0700
+    state: directory
+- name: Distribute ssh key
+  copy:
+    src: "{{userPrivateKeyFile}}.pub"
+    dest: "/home/{{userName}}/.ssh/authorized_keys"
+    mode: 0700
+    owner: "{{userName}}"
+    group: "{{userName}}"
+- name: Add newly created user to sudoers file
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    line: "{{userName}}      ALL = NOPASSWD: ALL"

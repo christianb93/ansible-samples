@@ -1,0 +1,14 @@
+---
+# Install a few selected packages that we need on every machine
+- name: Install basic packages
+  apt:
+    state: latest
+    name: "{{ item }}"
+    force_apt_get: yes
+    install_recommends: no
+    update_cache: yes
+  loop:
+    - docker.io
+    - python3-pip
+- name: Install Ansible
+  command: pip3 ansible
