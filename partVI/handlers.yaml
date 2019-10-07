@@ -1,0 +1,19 @@
+---
+  - hosts: localhost
+    connection: local
+    tasks:
+    # We first use copy with force=no to create an empty file only if the file does
+    # not exist. If the file exists, this will not result in a change
+    - name: Create empty file
+      copy:
+        content: ""
+        dest: test
+        force: no
+      notify: handle new file
+    handlers:
+    # This is our handler. Note that the name of the handler must be exactly
+    # as in the notify statement. Alternatively, we could use generic events
+    # and use the listen statement to make the handler listen to that event
+    - name: handle new file
+      debug:
+        msg: "Handler invoked"

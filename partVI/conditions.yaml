@@ -21,3 +21,21 @@
           msg: "Variable is equal to one"
         when:
           randomVar == "1"
+      # You need to be careful when combining loops with conditionals.
+      # The conditional will be evaluated once for each loop iteration,
+      # and the iteration will be skipped if the conditional evaluates
+      # to false. In the example below, only one iteration is run
+      - name: Combine loop with when
+        debug:
+          msg: "{{ item }}"
+        loop:
+          "{{ range (0, 3)|list }}"
+        when:
+          item == 1
+        register:
+          loopOutput
+      # Note, however, that the output of the loop still contains one item
+      # for every iteration, and we have to evaluate the key skipped to
+      # see whether the loop iteration was actually executed
+      - debug:
+          var: loopOutput
