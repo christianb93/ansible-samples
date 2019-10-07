@@ -1,0 +1,15 @@
+---
+  # This is our first play - it will bring up a new Docker container and register it with
+  # the inventory
+  - name: Bring up a Docker container that we will use as our host and build a dynamic inventory
+    hosts: localhost
+    roles:
+    - createContainer
+  #
+  # Our second play. Here we set up a default user in each container 
+  #
+  - name: Provision hosts
+    hosts: docker_nodes
+    become: yes
+    roles:
+    - defaultUser

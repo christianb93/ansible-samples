@@ -1,0 +1,4 @@
+---
+# defaults file for defaultUser
+userName: chr
+userPrivateKeyFile: ~/.ssh/ansible-default-user-key_rsa

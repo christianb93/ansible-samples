@@ -1,0 +1,30 @@
+---
+  # We first use the docker_container module to start our container. This of course assumes that you
+  # have built the image node:latest according to the Dockerfile which is distributed along with
+  # this script. We use bridge networking, but do not expose port 22
+- name: Run Docker container
+  docker_container:
+    auto_remove: yes
+    detach: yes
+    name: myTestNode
+    image: node:latest
+    network_mode: bridge
+    state: started
+  register: dockerData
+  # As we have chosen not to export the SSH port, we will have to figure out the IP of the container just created. We can
+  # extract this from the return value of the docker run command
+- name: Extract IP address from docker dockerData
+  set_fact:
+    ipAddress:  "{{ dockerData['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
+- name: Print IP address
+  debug:
+    msg: "Container IP address is {{ ipAddress }}"
+  # Now we add the new host to the inventory, as part of a new group docker_nodes
+  # This inventory is then valid for the remainder of the playbook execution
+- name: Add new host to inventory
+  add_host:
+    hostname: myTestNode
+    ansible_ssh_host: "{{ ipAddress }}"
+    ansible_ssh_user: ansible
+    ansible_ssh_private_key_file: "./ansible"
+    groups: docker_nodes
