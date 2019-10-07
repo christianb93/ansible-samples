@@ -1,0 +1,23 @@
+---
+  - hosts: localhost
+    connection: local
+    tasks:
+      # We populate a variable with a random value, 0 or 1. The Jinja2
+      # range function will return a sequence, and the random filter
+      # will pick a random item from it
+      - name: Populate variable with random value
+        set_fact:
+          randomVar: "{{ range(0, 2) | random }}"
+      - name: Print value
+        debug:
+          var: randomVar
+      # We now execute a second task only if this variable is
+      # equal to one. Note that the condition that we specify
+      # is already in Jinja2 context, so there is no need to
+      # add the double curly braces around it. Also make sure
+      # that data types match when doing the comparison
+      - name: Execute additional statement if randomVar is 1
+        debug:
+          msg: "Variable is equal to one"
+        when:
+          randomVar == "1"
