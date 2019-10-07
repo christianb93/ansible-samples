@@ -16,7 +16,7 @@
       # Each item in the list will be a pair of key and value
       # We also use loop_control / label to limit the output to the variable
       # name
-      - name: Loop over all environment variables and print their names
+      - name: Loop over all environment variables
         debug:
           msg: "{{ item.0 }}"
         loop:
@@ -26,7 +26,7 @@
             "{{ item.0 }}"
         register: loopOutput
       # As we have registered loopOutput with the loop, it will
-      # contain the output for all iterations
+      # contain the output for all iterations in an item called results
       - name: Print loopOutput
         debug:
           var: loopOutput.results
