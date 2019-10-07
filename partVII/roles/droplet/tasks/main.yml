@@ -6,7 +6,10 @@
       - doPrivateKeyFile != ''
       - targetState != ''
       - machineCount != ''
-      -
+      - osImage != ""
+      - regionID != ""
+      - sizeID != ""
+      - doSSHConfigFile != ""
   tags: ['check_vars']
 # Get the API token from the environment variable so that
 # we can easily access it
@@ -41,9 +44,9 @@
 - name: Bring up or stop machines
   digital_ocean_droplet:
     oauth_token: "{{ apiToken }}"
-    image: ubuntu-18-04-x64
-    region_id: fra1
-    size_id: s-1vcpu-1gb
+    image: "{{osImage}}"
+    region_id: "{{regionID}}"
+    size_id: "{{sizeID}}"
     ssh_keys: [ "{{ keyId }}" ]
     state: "{{ targetState }}"
     unique_name: yes
@@ -64,6 +67,7 @@
     ansible_ssh_host: "{{ item.data.droplet.networks.v4[0].ip_address }}"
     ansible_ssh_user: root
     ansible_ssh_private_key_file: "{{ doPrivateKeyFile }}"
+    host_key_checking: no
     groups: droplets
   loop: "{{ machineInfo.results }}"
   loop_control:
@@ -72,7 +76,7 @@
 # For each host, we also add an entry to .ssh/do_config
 - name: Add host to SSH config file
   shell: |
-    cat >> ~/.ssh/do_config <<EOF
+    cat >> {{doSSHConfigFile}} <<EOF
     Host "{{item.data.droplet.name}}"
     HostName "{{ item.data.droplet.networks.v4[0].ip_address }}"
     User "root"
@@ -93,7 +97,7 @@
     create: yes
     state: present
     path: ~/.ssh/config
-    line: Include ~/.ssh/do_config
+    line: Include {{doSSHConfigFile}}
 # And print success message
 - name: Print results
   debug:

@@ -1,0 +1,29 @@
+---
+# Our first play will bring up the machines
+- name: Create machines
+  hosts: localhost
+  connection: local
+  roles:
+  - droplet
+
+# The second play will wait until all machines are fully established. Here we use the inventory
+# that we have just created. Note that we have added the hosts with the SSH settings to the inventory,
+# so there is no need to supply the ansible_ssh_private_key_file and ansible_user values
+# We initially do not gather facts, as the SSH daemon might still be starting up, but just wait for
+# the hosts to come up
+- name: Wait for all machines to become ready
+  hosts: droplets
+  gather_facts: no
+  tasks:
+  - name: Wait for machine to become reachable
+    wait_for_connection:
+      delay: 5
+      sleep: 5
+
+# The next play does the actual setup of the machines. We first create a default user
+# and then install some basic packages
+- name: Basic setup
+  hosts: droplets
+  roles:
+  - defaultUser
+  - basicPackages

@@ -9,3 +9,16 @@ doPrivateKeyFile: ~/.ssh/do-default-key
 targetState: present
 # Number of machines to manage
 machineCount: 1
+# The OS image to use
+osImage: ubuntu-18-04-x64
+# The ID of the region in which we want to bring up the machine
+regionID: fra1
+# The slug of the machine type that we want to create. This is the smallest
+# machine type
+sizeID: s-1vcpu-1gb
+# For each host, we will add an entry to the local SSH configuration of
+# the user on the control machine running Ansible. To avoid issues with
+# an existing configuration, we do this by putting our configuration into
+# a separate file that we than include into ~/.ssh/config. This is
+# the name of this file
+doSSHConfigFile: ~/.ssh/do_config
