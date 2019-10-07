@@ -1,0 +1,32 @@
+---
+  - hosts: localhost
+    connection: local
+    tasks:
+      # A loop with a static list of items. We simply declare a list to loop over
+      # in YAML format
+      - name: Loop with a static list of items
+        debug:
+          msg: "{{ item}}"
+        loop:
+        - A
+        - B
+      # Here, we loop over the result of a Jinja2 expression. Note that
+      # ansible_facts.env is a dictionary, but we can only loop over
+      # lists, so we use items() first to convert the dictionary into a list
+      # Each item in the list will be a pair of key and value
+      # We also use loop_control / label to limit the output to the variable
+      # name
+      - name: Loop over all environment variables and print their names
+        debug:
+          msg: "{{ item.0 }}"
+        loop:
+         "{{ ansible_facts.env.items() }}"
+        loop_control:
+          label:
+            "{{ item.0 }}"
+        register: loopOutput
+      # As we have registered loopOutput with the loop, it will
+      # contain the output for all iterations
+      - name: Print loopOutput
+        debug:
+          var: loopOutput.results
