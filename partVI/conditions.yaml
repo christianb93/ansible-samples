@@ -1,6 +1,7 @@
 ---
   - hosts: localhost
     connection: local
+    gather_facts: no
     tasks:
       # We populate a variable with a random value, 0 or 1. The Jinja2
       # range function will return a sequence, and the random filter
