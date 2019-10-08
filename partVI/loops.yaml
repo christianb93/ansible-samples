@@ -9,6 +9,7 @@
           msg: "{{ item}}"
         loop:
         - A
+        - B
       # Here, we loop over the result of a Jinja2 expression. Note that
       # ansible_facts.env is a dictionary, but we can only loop over
       # lists, so we use items() first to convert the dictionary into a list
