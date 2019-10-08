@@ -9,10 +9,10 @@
           msg: "{{ item}}"
         loop:
         - A
-        - B
       # Here, we loop over the result of a Jinja2 expression. Note that
       # ansible_facts.env is a dictionary, but we can only loop over
       # lists, so we use items() first to convert the dictionary into a list
+      # To make this work with Python3, we also apply the list filter
       # Each item in the list will be a pair of key and value
       # We also use loop_control / label to limit the output to the variable
       # name
@@ -20,7 +20,7 @@
         debug:
           msg: "{{ item.0 }}"
         loop:
-         "{{ ansible_facts.env.items() }}"
+         "{{ ansible_facts.env.items() | list }}"
         loop_control:
           label:
             "{{ item.0 }}"
