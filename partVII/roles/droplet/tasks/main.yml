@@ -39,7 +39,7 @@
 # to the local SSH configuration of the user that is running Ansible. We do
 # this by including a file which we now prepare
 - name: Cleanup SSH config file
-  shell: "echo > ~/.ssh/do_config"
+  shell: "echo > {{doSSHConfigFile}}"
 # Having the key Id, we can now bring up the machines
 - name: Bring up or stop machines
   digital_ocean_droplet:
@@ -50,7 +50,7 @@
     ssh_keys: [ "{{ keyId }}" ]
     state: "{{ targetState }}"
     unique_name: yes
-    name: "myHost{{ item }}"
+    name: "droplet{{ item }}"
     wait: yes
     wait_timeout: 240
     tags:
