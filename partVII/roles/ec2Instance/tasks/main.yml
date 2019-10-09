@@ -4,22 +4,26 @@
 # Check that we have all variables that we need
 - assert:
     that:
-      -
+      - amiPattern != ""
+      - machineCount != ""
+      - amiOwner != ""
+      - instanceType != ""
+      - ec2KeyName != ""
+      - ec2Region != ""
+      - awsSSHConfigFile != ""
   tags: ['check_vars']
 
-# First we need to find the proper AMI to use
+# First we need to find the proper AMI to use. We first get a list of all
+# AMIs matching the OS name and and owner and then use Jinja2 templating
+# to get the one with the latest creation date
 - name: Locate latest AMI
   ec2_ami_facts:
     region: "eu-central-1"
-    owners: 099720109477
+    owners: "{{ amiOwner }}"
     filters:
-      name: "ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-????????"
+      name: "{{ amiPattern }}"
       state: "available"
   register: allAMIs
-  # Now get the latest AMI, this will put the image_id into latestAMI.image_id
-- name: Show all allAMIs
-  debug:
-    var: allAMIs
 - name: Sort by creation date to find the latest AMI
   set_fact:
     latestAMI: "{{ allAMIs.images | sort(attribute='creation_date') | last }}"
@@ -28,17 +32,72 @@
     var: latestAMI
 - name: Provision machine
   ec2:
-    exact_count: 1
+    exact_count: "{{ machineCount }}"
     count_tag: "managedByAnsible"
     image: "{{ latestAMI.image_id }}"
     instance_tags:
       managedByAnsible: true
-    instance_type: "t2.micro"
-    key_name: ec2-default-key
-    region: "eu-central-1"
+    instance_type: "{{instanceType}}"
+    key_name: "{{ ec2KeyName }}"
+    region: "{{ ec2Region }}"
     wait: yes
   register: ec2Result
 - name: Show results
   debug:
     var: ec2Result
-# Now we need to add the host to the inventory. 
+#  Later, we will add SSH configuration data for the hosts that we provision
+# to the local SSH configuration of the user that is running Ansible. We do
+# this by including a file which we now prepare
+- name: Cleanup SSH config file
+  shell: "echo > {{ awsSSHConfigFile }}"
+# Now we need to add the host to the inventory. We use
+# the names aws0, aws1, ..., so we need the index_var
+# feature of the loop control
+- name: Add IP address to inventory
+  add_host:
+    name: "aws{{ indx }}"
+    ansible_ssh_host: "{{ item.public_ip }}"
+    ansible_ssh_user: ubuntu
+    ansible_ssh_private_key_file: "{{ ec2PrivateKeyFile }}"
+    host_key_checking: no
+    groups: ec2Instances
+  loop: "{{ ec2Result.tagged_instances }}"
+  loop_control:
+    label: "{{ item.dns_name }}"
+    index_var: indx
+- name: print results
+  debug:
+    var: hostvars
+# For each host, we also add an entry to .ssh/aws_config
+- name: Add host to SSH config file
+  shell: |
+    cat >> {{awsSSHConfigFile}} <<EOF
+    Host "aws{{ indx }}"
+    HostName "{{ item.public_ip }}"
+    User "ubuntu"
+    IdentityFile "{{ ec2PrivateKeyFile }}"
+    CheckHostIP "no"
+    Compression "yes"
+    ForwardX11 "yes"
+    StrictHostKeyChecking "no"
+    EOF
+  loop: "{{ ec2Result.tagged_instances }}"
+  loop_control:
+    label: "{{ item.dns_name }}"
+    index_var: indx
+# Include our file in user-specific ssh-configuration file
+# on the control machine
+- name: Include EC2 SSH configuration file
+  lineinfile:
+    create: yes
+    state: present
+    path: ~/.ssh/config
+    line: Include {{awsSSHConfigFile}}
+# And print success message
+- name: Print results
+  debug:
+    msg: "Added host aws{{ indx }} - use ssh -i {{ ec2PrivateKeyFile }} -X -C ubuntu@{{ item.public_ip }} or ssh  aws{{ indx }} to connect"
+  loop: "{{ ec2Result.tagged_instances }}"
+  loop_control:
+    label: "{{ item.dns_name }}"
+    index_var: indx

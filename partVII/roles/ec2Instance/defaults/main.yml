@@ -1,2 +1,18 @@
 ---
-# defaults file for ec2Instance
+# A search pattern for the Ubuntu image and an owner.  We search for this AMI
+# by the given owner and then pick the latest version
+amiPattern: ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-????????
+amiOwner: 099720109477
+# The number of machines that we want to be running
+machineCount: 1
+# The instance type that we bring up
+instanceType: t2.micro
+# The name of the SSH key that AWS knows and that
+# will be present on each machine for the initial login
+ec2KeyName: ec2-default-key
+# The corresponding private key file (PEM file)
+ec2PrivateKeyFile: ~/.ssh/ec2-default-key.pem
+# The region in which we bring up the machine
+ec2Region: eu-central-1
+# The SSH config file that we use
+awsSSHConfigFile: ~/.ssh/aws_config
