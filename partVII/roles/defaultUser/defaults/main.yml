@@ -5,4 +5,4 @@ userName: chr
 # the name of the private key file on the control machine
 # that we use for this purpose. We assume that the corresponding
 # public key has the same filename with the extension .pub
-userPrivateKeyFile: ~/.ssh/do-default-key
+userPrivateKeyFile: ~/.ssh/default-user-key
