@@ -9,6 +9,9 @@
     update_cache: yes
   loop:
     - docker.io
-    - python3-pip
+    - python
+    - python-pip
+- name: Make sure that setuptools and wheel are up to date
+  command: python -m pip install --upgrade pip setuptools wheel
 - name: Install Ansible
-  command: pip3 ansible
+  command: pip install ansible
