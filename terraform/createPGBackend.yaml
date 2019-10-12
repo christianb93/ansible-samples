@@ -1,0 +1,31 @@
+---
+  # Set up a local PostgreSQL as a backend for Terraform
+  - name: Install PostgreSQL
+    hosts: localhost
+    become: yes
+    tasks:
+    - name: Install postgresql packages
+      apt:
+        state: latest
+        name: "{{ item }}"
+        force_apt_get: yes
+        update_cache: yes
+      loop:
+        - postgresql
+        - libpq-dev
+        - python-psycopg2
+    - name: Create a new user terraform
+      become: yes
+      become_user: postgres
+      postgresql_user:
+        name: terraform
+        password: terraform
+        state: present
+    - name: Create database terraform-state
+      become: yes
+      become_user: postgres
+      postgresql_db:
+        name: terraform-state
+        owner: terraform
+        state: present
+        
