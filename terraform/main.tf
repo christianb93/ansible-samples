@@ -6,6 +6,12 @@ provider "digitalocean" {
   token = "${var.do_token}"
 }
 
+# The backend - we use PostgreSQL
+terraform {
+  backend "pg" {
+  }
+}
+
 
 ######################################################################
 # Outputs
@@ -40,5 +46,6 @@ resource "digitalocean_droplet" "droplets" {
   region = var.region
   size   = var.size_slug
   ssh_keys = [ data.digitalocean_ssh_key.ssh_key_data.id ]
+  tags = ["ManagedByTerraform"]
   count = var.machine_count
 }
