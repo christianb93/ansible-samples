@@ -12,11 +12,18 @@ variable "ssh_key_name" {
   default = "do-default-key"
 }
 
-# The number of machines to provide
-variable "machine_count" {
+# The number of machines to provide, for web servers
+# and for DB servers
+variable "web_machine_count" {
   type = number
-  default = 1
+  default = 2
 }
+
+variable "db_machine_count" {
+  type = number
+  default = 2
+}
+
 
 # The size
 variable "size_slug" {

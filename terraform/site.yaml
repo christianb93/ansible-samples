@@ -1,0 +1,65 @@
+---
+  # Our first play
+  - name: Run Terraform and build inventory dynamically
+    hosts: localhost
+    tasks:
+      - name: Run Terraform
+        terraform:
+          project_path: "{{ playbook_dir }}"
+          state: present
+          workspace: default
+          variables:
+            do_token: "{{ lookup('env', 'DO_TOKEN') }}"
+        register: tf_results
+      - name: Start to assemble inventory
+        set_fact:
+          myInventory: "["
+      - name: Add individual servers to inventory string
+        set_fact:
+          myInventory: "{{ myInventory  }} {% for x in item[1].value %} {% set data =  x | from_json %} {{ data  }}, {% endfor %}   "
+        loop: "{{ tf_results.outputs.items()}}"
+      - name: Add final closing bracket
+        set_fact:
+          myInventory: "{{ myInventory  }} ]"
+      - name: Add entries to inventory
+        add_host:
+          name: "{{ item.name }}"
+          ansible_ssh_host: "{{ item.ip }}"
+          ansible_ssh_user: "root"
+          ansible_ssh_private_key_file: "~/.ssh/do-default-key"
+          host_key_checking: no
+          groups: "{{ item.groups }}"
+        loop: "{{ myInventory }}"
+
+
+  - name: Wait for all machines to become ready
+    hosts: all
+    gather_facts: no
+    tasks:
+    - name: Wait for machine to become reachable
+      wait_for_connection:
+        delay: 5
+        sleep: 5
+
+
+  - name: Install PostgreSQL on DB servers
+    hosts: db
+    become: yes
+    tasks:
+    - name: Install PostgreSQL
+      apt:
+        name: postgresql
+        state: latest
+        force_apt_get: yes
+        update_cache: yes
+
+  - name: Install Apache on web servers
+    hosts: web
+    become: yes
+    tasks:
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: latest
+        force_apt_get: yes
+        update_cache: yes
