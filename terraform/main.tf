@@ -1,16 +1,24 @@
 ######################################################################
 # Global setup
 ######################################################################
+
+# Terraform settings
+terraform {
+  # Make sure that we have at least version 0.12
+  required_version =  ">= 0.12"
+  # The backend - we use PostgreSQL
+  backend "pg" {
+  }
+}
+
+
 # The DigitalOcean provider
 provider "digitalocean" {
   token = "${var.do_token}"
 }
 
-# The backend - we use PostgreSQL
-terraform {
-  backend "pg" {
-  }
-}
+
+
 
 
 ######################################################################
