@@ -16,8 +16,7 @@
           myInventory: "["
       - name: Add individual servers to inventory string
         set_fact:
-          myInventory: "{{ myInventory  }} {% for x in item[1].value %} {% set data =  x | from_json %} {{ data  }}, {% endfor %}   "
-        loop: "{{ tf_results.outputs.items()}}"
+          myInventory: "{{ myInventory  }} {% for x in tf_results.outputs.inventory.value %} {% set data =  x | from_json %} {{ data  }}, {% endfor %}   "
       - name: Add final closing bracket
         set_fact:
           myInventory: "{{ myInventory  }} ]"
@@ -30,7 +29,6 @@
           host_key_checking: no
           groups: "{{ item.groups }}"
         loop: "{{ myInventory }}"
-
 
   - name: Wait for all machines to become ready
     hosts: all

@@ -16,21 +16,23 @@ terraform {
 ######################################################################
 # Outputs
 # Note that we need an output for each resource definition below.
-# If you add additional lines, use the existing lines as template
-# with the following changes:
-# - change the groups parameters, this is a list of the groups to
-#   which we will later add the server
-# - change the resource name in the variables referenced in the line
+# If you add additional resources, you will have to add a new variable
+# to the locals block below and add this variable to the concat
+# statement that makes up the output inventory
 ######################################################################
 
-
-output "web" {
-  value = formatlist("{ \"groups\" : \"['web']\", \"name\" : \"%s\" , \"ip\" :   \"%s\" }",  digitalocean_droplet.web[*].name, digitalocean_droplet.web[*].ipv4_address)
+locals {
+  web_inventory = formatlist("{ \"groups\" : \"['web']\", \"name\" : \"%s\" , \"ip\" :   \"%s\" }",  digitalocean_droplet.web[*].name, digitalocean_droplet.web[*].ipv4_address)
+  db_inventory = formatlist("{ \"groups\" : \"['db']\", \"name\" : \"%s\" , \"ip\" :   \"%s\" }",  digitalocean_droplet.db[*].name, digitalocean_droplet.db[*].ipv4_address)
 }
 
-output "db" {
-  value = formatlist("{ \"groups\" : \"['db']\", \"name\" : \"%s\" , \"ip\" :   \"%s\" }",  digitalocean_droplet.db[*].name, digitalocean_droplet.db[*].ipv4_address)
+
+output "inventory" {
+  value = formatlist("%s", concat(local.web_inventory, local.db_inventory))
 }
+
+
+
 
 
 ######################################################################
