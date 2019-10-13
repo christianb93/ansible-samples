@@ -1,0 +1,8 @@
+---
+# Install the Apache2 webserver
+- name: Install Apache2
+  apt:
+    force_apt_get: yes
+    state: latest
+    update_cache: yes
+    name: apache2

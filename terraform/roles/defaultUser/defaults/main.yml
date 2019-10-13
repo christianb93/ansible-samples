@@ -1,0 +1,8 @@
+---
+# The name of the user that we create on the remote host
+userName: chr
+# We will set up the user to be accessible via SSH. This is
+# the name of the private key file on the control machine
+# that we use for this purpose. We assume that the corresponding
+# public key has the same filename with the extension .pub
+userPrivateKeyFile: ~/.ssh/default-user-key

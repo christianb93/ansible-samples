@@ -1,0 +1,11 @@
+---
+# Tasks to install a firewall based on ufw
+- name: Allow SSH connections
+  ufw:
+    name: OpenSSH
+    rule: allow
+- name: Deny all other incoming traffic by default
+  ufw:
+    state: enabled
+    policy: deny
+    direction: incoming

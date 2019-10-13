@@ -1,0 +1,9 @@
+galaxy_info:
+  author: christianb93
+  description: Invoke Terraform and convert its output into a dynamic inventory
+  license: MIT
+  min_ansible_version: 2.4
+  galaxy_tags: []
+
+dependencies: []
+  

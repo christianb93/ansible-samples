@@ -1,54 +1,50 @@
 ---
-  # Our first play
-  - name: Run Terraform and build inventory dynamically
-    hosts: localhost
-    tasks:
-      - name: Run Terraform
-        terraform:
-          project_path: "{{ playbook_dir }}"
-          state: present
-          workspace: default
-          variables:
-            do_token: "{{ lookup('env', 'DO_TOKEN') }}"
-        register: tf_results
-      - name: Add entries to inventory
-        add_host:
-          name: "{{ item.name }}"
-          ansible_ssh_host: "{{ item.ip }}"
-          ansible_ssh_user: "root"
-          ansible_ssh_private_key_file: "~/.ssh/do-default-key"
-          host_key_checking: no
-          groups: "{{ item.groups }}"
-        loop: "{{ tf_results.outputs.inventory.value }}"
+# Our first play. This play will run Terraform via the Terraform module
+# and build a dynamic inventory from its output
+- name: Run Terraform and build inventory dynamically
+  hosts: localhost
+  roles:
+  - terraform
 
-  - name: Wait for all machines to become ready
-    hosts: all
-    gather_facts: no
-    tasks:
-    - name: Wait for machine to become reachable
-      wait_for_connection:
-        delay: 5
-        sleep: 5
+# Next, we build a local SSH configuration. This is not necessarily needed, but
+# makes it easy to SSH into the machines using their logical name
+- name: Build SSH configuration
+  hosts: localhost
+  roles:
+  - sshConfig
 
+# This play is only there to make sure that all machines are available before
+# we proceed
+- name: Wait for all machines to become ready
+  hosts: all
+  gather_facts: no
+  tasks:
+  - name: Wait for machine to become reachable
+    wait_for_connection:
+      delay: 10
+      sleep: 10
 
-  - name: Install PostgreSQL on DB servers
-    hosts: db
-    become: yes
-    tasks:
-    - name: Install PostgreSQL
-      apt:
-        name: postgresql
-        state: latest
-        force_apt_get: yes
-        update_cache: yes
+# We are now ready to perform the actual installation steps.
+# First, there is a play for those installation steps common
+# to all groups
+- name: Install default user and firewall on all servers
+  hosts: all
+  become: yes
+  roles:
+  - firewall
+  - defaultUser
 
-  - name: Install Apache on web servers
-    hosts: web
-    become: yes
-    tasks:
-    - name: Install Apache2
-      apt:
-        name: apache2
-        state: latest
-        force_apt_get: yes
-        update_cache: yes
+#
+# Next, we execute the roles that are specific for each group
+#
+- name: Install web servers
+  hosts: web
+  become: yes
+  roles:
+  - webserver
+
+- name: Install DB servers
+  hosts: db
+  become: yes
+  roles:
+  - dbserver
