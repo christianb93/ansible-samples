@@ -11,15 +11,6 @@
           variables:
             do_token: "{{ lookup('env', 'DO_TOKEN') }}"
         register: tf_results
-      - name: Start to assemble inventory
-        set_fact:
-          myInventory: "["
-      - name: Add individual servers to inventory string
-        set_fact:
-          myInventory: "{{ myInventory  }} {% for x in tf_results.outputs.inventory.value %} {% set data =  x | from_json %} {{ data  }}, {% endfor %}   "
-      - name: Add final closing bracket
-        set_fact:
-          myInventory: "{{ myInventory  }} ]"
       - name: Add entries to inventory
         add_host:
           name: "{{ item.name }}"
@@ -28,7 +19,7 @@
           ansible_ssh_private_key_file: "~/.ssh/do-default-key"
           host_key_checking: no
           groups: "{{ item.groups }}"
-        loop: "{{ myInventory }}"
+        loop: "{{ tf_results.outputs.inventory.value }}"
 
   - name: Wait for all machines to become ready
     hosts: all

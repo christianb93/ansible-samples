@@ -22,15 +22,23 @@ terraform {
 ######################################################################
 
 locals {
-  web_inventory = formatlist("{ \"groups\" : \"['web']\", \"name\" : \"%s\" , \"ip\" :   \"%s\" }",  digitalocean_droplet.web[*].name, digitalocean_droplet.web[*].ipv4_address)
-  db_inventory = formatlist("{ \"groups\" : \"['db']\", \"name\" : \"%s\" , \"ip\" :   \"%s\" }",  digitalocean_droplet.db[*].name, digitalocean_droplet.db[*].ipv4_address)
+  web_inventory =  [for s in digitalocean_droplet.web[*] : {
+    # the Ansible groups to which we will assign the server
+    "groups" : "['web']",
+    "name"   : "${s.name}",
+    "ip"     : "${s.ipv4_address}"
+  } ]
+  db_inventory =  [for s in digitalocean_droplet.db[*] : {
+    "groups" : "['db']",
+    "name"   : "${s.name}",
+    "ip"     : "${s.ipv4_address}"
+  } ]
 }
 
 
 output "inventory" {
-  value = formatlist("%s", concat(local.web_inventory, local.db_inventory))
+  value = concat(local.web_inventory, local.db_inventory)
 }
-
 
 
 
