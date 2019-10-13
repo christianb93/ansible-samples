@@ -9,4 +9,4 @@ This repository contains a collection of playbooks and other scripts that are re
 * Part V: Working with inventories and using Docker containers as Ansible hosts
 * Part VI: Control structures and roles
 * Part VII: Using Ansible with cloud providers
-* Part VII: Using Ansible with Terraform
+* Part VIII (folder terraform): Using Ansible with Terraform
