@@ -133,7 +133,7 @@ resource "google_compute_firewall" "internal-firewall" {
 # network
 resource "google_compute_instance" "jump-host" {
   name         = "jump-host"
-  machine_type = "n1-standard-2"
+  machine_type = "n1-standard-1"
 
   boot_disk {
     initialize_params {
