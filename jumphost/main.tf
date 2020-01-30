@@ -8,10 +8,9 @@ variable "gcp_service_account_key" {
   default = "~/gcp_terraform_service_account.json"
 }
 
-# The ID of the project that we use and in which all our resources live
-variable "project_id" {
-  type = string
-  default = "terraform-project-12345"
+# Get the ID of the project that we use from our service account key 
+locals {
+  key_data = jsondecode(file("${var.gcp_service_account_key}"))
 }
 
 # The region in which we bring up our resources
@@ -43,7 +42,7 @@ variable "vagrant_private_ssh_key_file" {
 # specify location of credentials for the service account that we use
 provider "google" {
   credentials = "${file(var.gcp_service_account_key)}"
-  project     = var.project_id
+  project     = local.key_data.project_id
   region = var.region
   zone = var.zone
 }
