@@ -1,0 +1,18 @@
+<volume type='file'>
+  <name>{{volume_name}}</name>
+  <source>
+  </source>
+  <capacity unit='GB'>5</capacity>
+  <target>
+    <format type='{{volume_type}}'/>
+    <permissions>
+      <mode>0600</mode>
+      <owner>0</owner>
+      <group>0</group>
+    </permissions>
+  </target>
+  <backingStore>
+    <path>{{base_image_path}}</path>
+    <format type='{{volume_type}}'/>
+  </backingStore>
+</volume>
