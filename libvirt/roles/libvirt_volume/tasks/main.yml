@@ -1,0 +1,17 @@
+---
+#
+# Create a storage pool
+#
+- name: Make sure that pool directory exists
+  file:
+    path: "{{pool_dir}}"
+    state: directory
+- name: Create storage pool
+  virt_pool:
+    command: define
+    name: "{{volume_pool}}"
+    xml: '{{ lookup("template", "pool.xml.j2") }}'
+- name: Make sure that pool is active
+  virt_pool:
+    name: "{{volume_pool}}"
+    state: active

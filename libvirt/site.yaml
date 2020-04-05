@@ -1,0 +1,41 @@
+#
+# Create a volume and a network and bring up a virtual machine
+# using KVM and libvirt
+#
+# To run this, you need the following installed on your machine:
+# libvirt 
+# python3-libvirt 
+# lxml
+# You can install all this on an Ubuntu system with 
+# sudo apt-get install \
+#  libvirt-daemon \
+#  libvirt-clients \
+#  virt-manager \
+#  python3-libvirt
+# pip3 install lxml
+#
+# Note that this creates a storage pool in the state subdirectory of the
+# playbook dir, so make sure that you remove this storage pool before deleting
+# the state directory to avoid dangling references
+#
+- name: Create volume
+  hosts: localhost
+  become: no 
+  vars:
+    volume_name: "test-volume"
+    volume_type: "qcow2"
+    base_image_path: "{{playbook_dir}}/state/bionic.qcow2"
+    volume_pool: "ansible"
+    pool_dir: "{{playbook_dir}}/state/pool"
+  pre_tasks:
+    - name: Make sure that state directory exists
+      file:
+        path: "{{playbook_dir}}/state"
+        state: directory
+    - name: Make sure that we have downloaded the base image
+      get_url:
+        url: https://cloud-images.ubuntu.com/minimal/releases/bionic/release-20200318/ubuntu-18.04-minimal-cloudimg-amd64.img
+        dest: "{{base_image_path}}"
+        checksum: "sha256:cb460e7b363ec7a87742ebad5f3cf0f75020b8adedcf2bda7f5eb8881928edb4"
+  roles:
+    - libvirt_volume
