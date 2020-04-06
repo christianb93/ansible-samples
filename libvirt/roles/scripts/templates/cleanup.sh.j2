@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# Delete instance
+#
+virsh destroy {{vm_name}}
+virsh undefine {{vm_name}}
+#
+# Delete volume
+#
+virsh vol-delete {{volume_name}} --pool={{volume_pool}} 
+#
+# Delete network
+#
+virsh net-destroy {{network_name}}
+virsh net-undefine {{network_name}}
+#
+# Delete cloud-config drive
+#
+virsh vol-delete cloud-config.iso --pool={{volume_pool}}
+#
+# Finally delete storage pool
+#
+virsh pool-destroy {{volume_pool}} 
+virsh pool-delete {{volume_pool}}

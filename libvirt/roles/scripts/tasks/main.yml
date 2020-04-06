@@ -1,0 +1,11 @@
+---
+- name: Create cleanup script
+  template:
+    src: cleanup.sh.j2
+    dest: "{{state_dir}}/cleanup.sh"
+    mode: 0700
+- name: Create ssh script
+  template:
+    src: ssh.sh.j2
+    dest: "{{state_dir}}/ssh.sh"
+    mode: 0700

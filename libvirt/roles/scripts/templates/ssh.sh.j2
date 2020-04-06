@@ -1,0 +1,15 @@
+get_ip() {
+echo $(virsh domifaddr \
+    {{vm_name}} \
+    | grep "vnet0" \
+    | awk '{print $4}' \
+    | sed "s/\/24//")
+}
+
+ip=$(get_ip)
+while [ "$ip" == "" ]; do
+  sleep 5
+  echo "Waiting for IP..."
+  ip=$(get_ip)
+done
+ssh -i {{ssh_private_key_file}} ubuntu@$ip

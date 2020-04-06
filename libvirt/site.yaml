@@ -53,3 +53,9 @@
   become: no
   roles:
     - libvirt_domain
+
+- name: Create scripts 
+  hosts: localhost
+  become: no
+  roles:
+    - scripts
