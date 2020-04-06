@@ -12,6 +12,25 @@
   template:
     src: user-data.yaml.j2
     dest: "{{state_dir}}/user-data"
-- name: (Re)-create ISO image
-  shell: |
-    genisoimage -o {{state_dir}}/cloud-config.iso -joliet -rock -volid cidata state/user-data state/meta-data 
+- name: Check whether cloud-config volume already exists
+  stat: 
+    path: "{{pool_dir}}/cloud-config.iso"
+  register: 
+    cloud_config_iso
+- name: Create cloud-config drive if needed
+  block:
+    - name: Create XML template for empty volume
+      template:
+        src: cloud-config-volume.xml.j2
+        dest: "{{state_dir}}/cloud-config-volume.xml"
+    - name: Create empty volume 
+      shell: |
+        virsh vol-create --pool={{volume_pool}} {{state_dir}}/cloud-config-volume.xml
+    - name: (Re)-create ISO image
+      shell: |
+        genisoimage -o {{state_dir}}/cloud-config.iso -joliet -rock -volid cidata state/user-data state/meta-data 
+    - name: Import image 
+      shell: |
+        virsh vol-upload cloud-config.iso {{state_dir}}/cloud-config.iso --pool={{volume_pool}}
+  when: not cloud_config_iso.stat.exists
+
