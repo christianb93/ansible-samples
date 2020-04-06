@@ -1,4 +1,9 @@
 ---
+- name: Create an SSH key pair
+  openssh_keypair:
+    path: "{{ssh_private_key_file}}"
+    size: 2048
+    type: rsa
 - name: Create meta data  
   template:
     src: meta-data.yaml.j2

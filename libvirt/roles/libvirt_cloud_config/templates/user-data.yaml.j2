@@ -1,4 +1,4 @@
 #cloud-config
-password: password
-chpasswd: { expire: False }
-ssh_pwauth: True
+ssh_authorized_keys:
+      - {{lookup('file',ssh_public_key_file)}}
+

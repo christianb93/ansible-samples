@@ -59,3 +59,8 @@ vm_memory: 1024
 # Number of vCPUs
 #
 vm_vcpus: 1
+#
+# Path of the SSH key to use (will be generated if it does not exist). 
+#
+ssh_public_key_file: "{{state_dir}}/ssh-key.pub"
+ssh_private_key_file: "{{state_dir}}/ssh-key"
