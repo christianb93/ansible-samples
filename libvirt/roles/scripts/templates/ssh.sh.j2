@@ -1,7 +1,7 @@
 get_ip() {
 echo $(virsh domifaddr \
     {{vm_name}} \
-    | grep "vnet0" \
+    | grep "ipv4" \
     | awk '{print $4}' \
     | sed "s/\/24//")
 }
