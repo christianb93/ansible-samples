@@ -11,3 +11,4 @@ This repository contains a collection of playbooks and other scripts that are re
 * Part VII: Using Ansible with cloud providers
 * Part VIII (folder terraform): Using Ansible with Terraform
 * Part IX (folder jumphost): Using Ansible with a bastion host
+* Part X (folder libvirt): Use Ansible to manage KVM domains
