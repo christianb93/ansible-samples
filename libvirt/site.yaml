@@ -34,6 +34,13 @@
         url: "{{base_image_url}}"
         dest: "{{base_image_path}}"
         checksum: "{{base_image_checksum}}"
+    - name: Determine ID of kvm group
+      shell: |
+        cat /etc/group | grep "kvm:" | awk -F ":" '{print $3'}
+      register: 
+        kvm_group
+    - set_fact:
+        kvm_group_id: "{{kvm_group.stdout}}"        
 
 - name: Create volume and network
   hosts: localhost
