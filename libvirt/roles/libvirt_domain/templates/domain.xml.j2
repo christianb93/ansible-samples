@@ -38,6 +38,12 @@
       <alias name='virtio-disk0'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
     </disk>
+    <disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw'/>
+      <source file='{{state_dir}}/cloud-config.iso'/>
+      <target dev='vdb' bus='virtio'/>
+      <readonly/>
+    </disk>    
     <controller type='usb' index='0' model='ich9-ehci1'>
       <alias name='usb'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x7'/>

@@ -42,6 +42,12 @@
     - libvirt_volume
     - libvirt_network
 
+- name: Prepare metadata drive 
+  hosts: localhost
+  become: no 
+  roles:
+    - libvirt_cloud_config
+
 - name: Create virtual machine 
   hosts: localhost
   become: no

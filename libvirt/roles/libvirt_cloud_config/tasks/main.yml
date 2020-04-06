@@ -1,0 +1,12 @@
+---
+- name: Create meta data  
+  template:
+    src: meta-data.yaml.j2
+    dest: "{{state_dir}}/meta-data"
+- name: Create user data
+  template:
+    src: user-data.yaml.j2
+    dest: "{{state_dir}}/user-data"
+- name: (Re)-create ISO image
+  shell: |
+    genisoimage -o {{state_dir}}/cloud-config.iso -joliet -rock -volid cidata state/user-data state/meta-data 
