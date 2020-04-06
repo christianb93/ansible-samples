@@ -1,0 +1,32 @@
+---
+#
+# Create a storage pool
+#
+- name: Make sure that pool directory exists
+  file:
+    path: "{{pool_dir}}"
+    state: directory
+- name: Create storage pool
+  virt_pool:
+    command: define
+    name: "{{volume_pool}}"
+    xml: '{{ lookup("template", "pool.xml.j2") }}'
+- name: Make sure that pool is active
+  virt_pool:
+    name: "{{volume_pool}}"
+    state: active
+- name: Check whether the volume already exists
+  shell: 
+    virsh vol-list --pool={{volume_pool}} | grep "{{volume_name}}" | wc -l
+  register:
+    volume_list_result
+- name: If needed create the volume 
+  block:
+    - name: Create XML file
+      template:
+        src: volume.xml.j2
+        dest: "{{state_dir}}/volume.xml"
+    - name: Create volume
+      shell: |
+        virsh vol-create --pool={{volume_pool}} {{state_dir}}/volume.xml
+  when: volume_list_result.stdout == "0"

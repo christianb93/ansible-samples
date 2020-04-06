@@ -9,6 +9,12 @@ variable "gcp_service_account_key" {
 }
 
 
+# Get the ID of the project that we use from our service account key 
+locals {
+  key_data = jsondecode(file("${var.gcp_service_account_key}"))
+}
+
+
 # The region in which we bring up our resources
 variable "region" {
   type = string
@@ -33,9 +39,6 @@ variable "vagrant_private_ssh_key_file" {
   default = "~/.ssh/gcp-default-key"
 }
 
-locals {
-  key_data = jsondecode(file("${var.gcp_service_account_key}"))
-}
 
 # Define provider, region, zone and project and
 # specify location of credentials for the service account that we use

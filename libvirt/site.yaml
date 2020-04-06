@@ -1,0 +1,74 @@
+#
+# Create a volume and a network and bring up a virtual machine
+# using KVM and libvirt
+#
+# To run this, you need the following installed on your machine:
+# libvirt 
+# python3-libvirt 
+# lxml
+# You can install all this on an Ubuntu system with 
+# sudo apt-get install \
+#  libvirt-daemon \
+#  libvirt-clients \
+#  virt-manager \
+#  python3-libvirt
+# pip3 install lxml
+#
+# Note that this creates a storage pool in the state subdirectory of the
+# playbook dir, so make sure that you remove this storage pool before deleting
+# the state directory to avoid dangling references
+#
+- name: Preparations
+  hosts: localhost
+  become: no 
+  vars:
+    state_dir: "{{playbook_dir}}/state"    
+    base_image_path: "{{playbook_dir}}/state/bionic.qcow2"
+  tasks:
+    - name: Make sure that state directory exists
+      file:
+        path: "{{state_dir}}"
+        state: directory
+    - name: Make sure that we have downloaded the base image
+      get_url:
+        url: http://cloud-images.ubuntu.com/bionic/20200324/bionic-server-cloudimg-amd64.img
+        dest: "{{base_image_path}}"
+        checksum: "sha256:647bbb16648a87ff506de2e3dbdec8dc2e36b35f422556d846a500482429917d"
+
+- name: Create volume
+  hosts: localhost
+  become: no 
+  vars:
+    volume_name: "test-volume"
+    volume_type: "qcow2"
+    base_image_path: "{{playbook_dir}}/state/bionic.qcow2"
+    volume_pool: "ansible"
+    state_dir: "{{playbook_dir}}/state"    
+    pool_dir: "{{state_dir}}/pool"
+  roles:
+    - libvirt_volume
+
+- name: Create network
+  hosts: localhost
+  become: no 
+  vars:
+    network_name: "test-network"
+    network_bridge: "test-bridge"
+    network_gateway_ip: "192.168.200.1"
+    network_dhcp_start: "192.168.200.2"
+    network_dhcp_end: "192.168.200.100"
+    state_dir: "{{playbook_dir}}/state"    
+  roles:
+    - libvirt_network
+
+- name: Create domain
+  hosts: localhost
+  become: no 
+  vars:
+    volume_name: "test-volume"
+    volume_type: "qcow2"
+    volume_pool: "ansible"
+    state_dir: "{{playbook_dir}}/state"    
+  roles:
+    - libvirt_domain
+
