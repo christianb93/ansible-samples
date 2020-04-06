@@ -1,0 +1,18 @@
+---
+- name: Create XML definition for domain
+  template:
+    src: domain.xml.j2
+    dest: "{{state_dir}}/domain.xml"
+- name: Check whether the domain already exists 
+  shell: |
+    virsh list --all | grep "{{vm_name}}" | wc -l 
+  register:
+    virsh_list_output
+- name: Define domain if needed 
+  shell: |
+    virsh define {{state_dir}}/domain.xml
+  when: virsh_list_output.stdout == "0"
+- name: Start domain
+  virt:
+    state: running
+    name: "{{vm_name}}"

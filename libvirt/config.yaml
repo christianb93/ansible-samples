@@ -1,0 +1,61 @@
+---
+#
+# A directory (which will be created if needed) where we store state, including
+# the files backing our virtual volumes
+#
+state_dir: "{{playbook_dir}}/state"    
+#
+# The base image URL
+#
+base_image_url: http://cloud-images.ubuntu.com/bionic/20200324/bionic-server-cloudimg-amd64.img
+#
+# Base image checksum, in the format <checksum type>:<checksum value>
+#
+base_image_checksum: sha256:647bbb16648a87ff506de2e3dbdec8dc2e36b35f422556d846a500482429917d
+#
+# The path where we store our base image 
+#
+base_image_path: "{{playbook_dir}}/state/bionic.qcow2"
+#
+# The name of the root volume that we create for our machine
+#
+volume_name: "test-volume"
+#
+# The type of the volume
+#
+volume_type: "qcow2"
+#
+# We create a new volume pool for our images, this is its name
+#
+volume_pool: "ansible"
+#
+# A directory used to store the volumes in the pool
+#
+pool_dir: "{{state_dir}}/pool"
+#
+# The name of the network that we create and the name of the 
+# underlying Linux bridge (which will be created as well)
+#
+network_name: "ansible"
+network_bridge: "ansible-bridge"
+#
+# The IP of the bridge
+#
+network_gateway_ip: "192.168.202.1"
+#
+# The DHCP range that is available for virtual machines on the network
+#
+network_dhcp_start: "192.168.202.2"
+network_dhcp_end: "192.168.202.100"
+#
+# The name of our virtual machine (domain) 
+# 
+vm_name: test-instance
+#
+# RAM of our VM, in MB
+#
+vm_memory: 1024
+#
+# Number of vCPUs
+#
+vm_vcpus: 1
