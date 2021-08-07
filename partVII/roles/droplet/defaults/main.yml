@@ -10,7 +10,7 @@ targetState: present
 # Number of machines to manage
 machineCount: 1
 # The OS image to use
-osImage: ubuntu-18-04-x64
+osImage: ubuntu-20-04-x64
 # The ID of the region in which we want to bring up the machine
 regionID: fra1
 # The slug of the machine type that we want to create. This is the smallest
